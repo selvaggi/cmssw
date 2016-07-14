@@ -3,7 +3,6 @@
 #include "DataFormats/Candidate/interface/Candidate.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/BTauReco/interface/TrackIPTagInfo.h"
-
 #include "RecoBTag/SecondaryVertex/interface/TrackSelector.h"
 
 using namespace reco; 
@@ -24,6 +23,7 @@ TrackSelector::TrackSelector(const edm::ParameterSet &params) :
 	sip3dValMax(params.getParameter<double>("sip3dValMax")),
 	sip3dSigMin(params.getParameter<double>("sip3dSigMin")),
 	sip3dSigMax(params.getParameter<double>("sip3dSigMax")),
+	useMvaSelection_(params.existsAs<bool>("useMvaSelection_") ?  params.getParameter<bool>("useMvaSelection_") : false),
 	useVariableJTA_(params.existsAs<bool>("useVariableJTA") ?  params.getParameter<bool>("useVariableJTA") : false)
 {
 	std::string qualityClass =
@@ -48,6 +48,18 @@ TrackSelector::TrackSelector(const edm::ParameterSet &params) :
 	    params.getParameter<double>("max_pT_dRcut"),
 	    params.getParameter<double>("max_pT_trackPTcut") };
 	}
+
+        if (useMvaSelection_){
+           trackSelBDTVarMin = params.getParameter<double>("trackSelBDTVarMin");
+           weightFile_ = params.getParameter<edm::FileInPath>("weightFile");
+ 
+           // initialize MVA evaluators
+           evaluator_MVA_.reset( new TMVAEvaluator() );
+           std::vector<std::string> variables({"Track_dz", "Track_length", "Track_dist", "Track_IP2D", "Track_pt", "Track_chi2", "Track_nHitPixel", "Track_nHitAll"});
+           evaluator_MVA_->initialize("Color:Silent:Error", "BDT", weightFile_.fullPath(), variables);
+
+        }
+
 }
 
 bool
@@ -102,7 +114,23 @@ TrackSelector::trackSelection(const Track &track,
                               const Jet &jet,
                               const GlobalPoint &pv) const
 {
+   // MVA stuff
+  reco::TrackBase::Point p (pv.x(), pv.y(), pv.z());
+  std::map<std::string,float> variables;
 
+  variables["Track_dz"] = track.dz(p);
+  variables["Track_length"] = (ipData.closestToJetAxis - pv).mag();
+  variables["Track_dist"] = std::abs(ipData.distanceToJetAxis.value());
+  variables["Track_IP2D"] = ipData.ip2d.value();
+  variables["Track_pt"] = track.pt();
+  variables["Track_chi2"] = track.normalizedChi2();
+  variables["Track_nHitPixel"] = track.hitPattern().numberOfValidPixelHits();
+  variables["Track_nHitAll"] = track.hitPattern().numberOfValidHits();
+
+  double mvaValue = evaluator_MVA_->evaluate(variables); 
+ 
+  std::cout<<mvaValue<<std::endl;
+ 
   return (!selectQuality || track.quality(quality)) &&
     (minPixelHits <= 0 ||
      track.hitPattern().numberOfValidPixelHits() >= (int)minPixelHits) &&

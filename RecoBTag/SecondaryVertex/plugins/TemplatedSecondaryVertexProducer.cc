@@ -1132,8 +1132,11 @@ void TemplatedSecondaryVertexProducer<IPTI,VTX>::fillDescriptions(edm::Configura
     trackSelection.add<double>("b_pT",0.3684);
     trackSelection.add<double>("max_pT",500);
     trackSelection.add<bool>("useVariableJTA",false);
+    trackSelection.add<bool>("useMvaSelection",false);
+    trackSelection.add<edm::FileInPath>("/afs/cern.ch/work/s/selvaggi/public/RMVAClassification_BDT.weights.xml.gz")
     trackSelection.add<double>("maxDecayLen",99999.9);
     trackSelection.add<double>("sip3dValMin",-99999.9);
+    trackSelection.add<double>("trackSelBDTVarMin",-99999.9);
     trackSelection.add<double>("max_pT_dRcut",0.1);
     trackSelection.add<double>("a_pT",0.005263);
     trackSelection.add<unsigned int>("totalHitsMin",8);

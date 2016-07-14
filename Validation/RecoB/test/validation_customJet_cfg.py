@@ -65,9 +65,13 @@ if not "ak4PFJetsCHS" in whichJets:
     process.softPFElectronsTagInfos.jets          = newjetID
     process.patJetGenJetMatch.src                 = newjetID
 
+
+
 process.btagSequence = cms.Sequence(
     process.ak4JetTracksAssociatorAtVertexPF *
     process.btagging
+    #process.btaggingV2
+
     )
 process.jetSequences = cms.Sequence(process.goodOfflinePrimaryVertices * process.btagSequence)
 
@@ -113,7 +117,7 @@ else:
     process.JECseq *= (getattr(process,corrLabel+"ResidualCorrector") * getattr(process,corrLabel+"L1FastL2L3ResidualCorrector"))
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(-1)
+    input = cms.untracked.int32(10)
 )
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring()
@@ -142,7 +146,7 @@ process.dqmSaver.saveByRun = cms.untracked.int32(-1)
 process.dqmSaver.saveAtJobEnd =cms.untracked.bool(True) 
 process.dqmSaver.forceRunNumber = cms.untracked.int32(1)
 process.PoolSource.fileNames = [
-
+'/store/mc/RunIISpring16DR80/TT_TuneCUETP8M1_13TeV-powheg-pythia8/GEN-SIM-RECODEBUG/PUSpring16_RECODEBUG_80X_mcRun2_asymptotic_2016_v3_ext3-v1/20000/00C31A90-2237-E611-9C70-002590D0AFD0.root'
 ]
 
 #keep the logging output to a nice level
@@ -150,4 +154,4 @@ process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.MessageLogger.cerr.FwkReport.reportEvery = 100
 
 process.GlobalTag = tag
-
+open('pydump.py','w').write(process.dumpPython())
