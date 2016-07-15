@@ -24,6 +24,6 @@ vertexTrackSelectionBlock = cms.PSet(
                 useVariableJTA = cms.bool(False),
                 useMvaSelection = cms.bool(False),   
                 trackSelBDTVarMin = cms.double(-99999.9),
-                weightFile = cms.FileInPath('/afs/cern.ch/work/s/selvaggi/public/RMVAClassification_BDT.weights.xml.gz') 
+                weightFile = cms.FileInPath('RecoBTag/SecondaryVertex/data/TMVAClassification_BDT.weights.xml.gz') 
 	)
 )

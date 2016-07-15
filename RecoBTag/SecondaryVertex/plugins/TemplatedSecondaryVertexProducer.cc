@@ -1132,11 +1132,8 @@ void TemplatedSecondaryVertexProducer<IPTI,VTX>::fillDescriptions(edm::Configura
     trackSelection.add<double>("b_pT",0.3684);
     trackSelection.add<double>("max_pT",500);
     trackSelection.add<bool>("useVariableJTA",false);
-    trackSelection.add<bool>("useMvaSelection",false);
-    trackSelection.add<edm::FileInPath>("/afs/cern.ch/work/s/selvaggi/public/RMVAClassification_BDT.weights.xml.gz")
     trackSelection.add<double>("maxDecayLen",99999.9);
     trackSelection.add<double>("sip3dValMin",-99999.9);
-    trackSelection.add<double>("trackSelBDTVarMin",-99999.9);
     trackSelection.add<double>("max_pT_dRcut",0.1);
     trackSelection.add<double>("a_pT",0.005263);
     trackSelection.add<unsigned int>("totalHitsMin",8);
@@ -1158,6 +1155,12 @@ void TemplatedSecondaryVertexProducer<IPTI,VTX>::fillDescriptions(edm::Configura
     trackSelection.add<double>("sip3dSigMax",99999.9);
     trackSelection.add<double>("sip2dSigMin",-99999.9);
     trackSelection.add<double>("b_dR",0.6263);
+    trackSelection.add<bool>("useMvaSelection",false);
+    std::string xmlpath = "RecoBTag/SecondaryVertex/data/TMVAClassification_BDT.weights.xml.gz";
+    
+
+    trackSelection.add<edm::FileInPath>("weightFile",edm::FileInPath(xmlpath));
+    trackSelection.add<double>("trackSelBDTVarMin",-99999.9);
     desc.add<edm::ParameterSetDescription>("trackSelection",trackSelection);
   }
   desc.add<std::string>("trackSort","sip3dSig");
