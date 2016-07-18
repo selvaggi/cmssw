@@ -48,22 +48,15 @@ TrackSelector::TrackSelector(const edm::ParameterSet &params) :
 	    params.getParameter<double>("max_pT_dRcut"),
 	    params.getParameter<double>("max_pT_trackPTcut") };
 	}
-        
-        std::cout<<"do mva sel: "<<useMvaSelection_<<std::endl;
       
         if (useMvaSelection_){
            trackSelBDTVarMin = params.getParameter<double>("trackSelBDTVarMin");
            weightFile_ = params.existsAs<edm::FileInPath>("weightFile") ? params.getParameter<edm::FileInPath>("weightFile") : edm::FileInPath("RecoBTag/SecondaryVertex/data/TMVAClassification_BDT.weights.xml.gz");
-           //weightFile_(params.existsAs<edm::FileInPath>("weightFile") ? params.getParameter<edm::FileInPath>("weightFile") : edm::FileInPath()) 
-           std::cout<<"mva min value: "<<trackSelBDTVarMin<<std::endl;
-           std::cout<<"xml file     : "<<weightFile_<<std::endl;
            // initialize MVA evaluators
            evaluator_MVA_.reset( new TMVAEvaluator() );
-           std::cout<<"reset mva eval "<<std::endl;
            std::vector<std::string> variables({"Track_dz", "Track_length", "Track_dist", "Track_IP2D", "Track_pt", "Track_chi2", "Track_nHitPixel", "Track_nHitAll"});
            std::vector<std::string> spectators;
-           evaluator_MVA_->initialize("V:Color:!Silent:Error", "BDT", weightFile_.fullPath(), variables, spectators);
-           std::cout<<"initialized mva "<<std::endl;
+           evaluator_MVA_->initialize("!V:Color:!Silent:Error", "BDT", weightFile_.fullPath(), variables, spectators);
 
         }
 
@@ -121,24 +114,29 @@ TrackSelector::trackSelection(const Track &track,
                               const Jet &jet,
                               const GlobalPoint &pv) const
 {
+
+
+
+
    // MVA stuff
-  reco::TrackBase::Point p (pv.x(), pv.y(), pv.z());
-  std::map<std::string,float> variables;
+  if(useMvaSelection_){
 
-  variables["Track_dz"] = track.dz(p);
-  variables["Track_length"] = (ipData.closestToJetAxis - pv).mag();
-  variables["Track_dist"] = std::abs(ipData.distanceToJetAxis.value());
-  variables["Track_IP2D"] = ipData.ip2d.value();
-  variables["Track_pt"] = track.pt();
-  variables["Track_chi2"] = track.normalizedChi2();
-  variables["Track_nHitPixel"] = track.hitPattern().numberOfValidPixelHits();
-  variables["Track_nHitAll"] = track.hitPattern().numberOfValidHits();
+    reco::TrackBase::Point p (pv.x(), pv.y(), pv.z());
+    std::map<std::string,float> variables;
 
-  std::cout<<"got here, before evaluate"<<std::endl;  
-  double mvaValue = evaluator_MVA_->evaluate(variables); 
- 
-  std::cout<<mvaValue<<std::endl;
- 
+    variables["Track_dz"] = track.dz(p);
+    variables["Track_length"] = (ipData.closestToJetAxis - pv).mag();
+    variables["Track_dist"] = std::abs(ipData.distanceToJetAxis.value());
+    variables["Track_IP2D"] = ipData.ip2d.value();
+    variables["Track_pt"] = track.pt();
+    variables["Track_chi2"] = track.normalizedChi2();
+    variables["Track_nHitPixel"] = track.hitPattern().numberOfValidPixelHits();
+    variables["Track_nHitAll"] = track.hitPattern().numberOfValidHits();
+
+    double mvaValue = evaluator_MVA_->evaluate(variables); 
+    return (mvaValue > trackSelBDTVarMin); 
+  }
+
   return (!selectQuality || track.quality(quality)) &&
     (minPixelHits <= 0 ||
      track.hitPattern().numberOfValidPixelHits() >= (int)minPixelHits) &&
