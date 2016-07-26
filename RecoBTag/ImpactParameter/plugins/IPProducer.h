@@ -52,6 +52,10 @@
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "FWCore/Framework/interface/ConsumesCollector.h"
 
+// MVA stuff
+#include "CommonTools/Utils/interface/TMVAEvaluator.h"
+
+
 class HistogramProbabilityEstimator;
 using boost::bind;
 
@@ -165,6 +169,12 @@ class IPProducer : public edm::stream::EDProducer<> {
     bool  m_directionWithTracks;
     bool  m_directionWithGhostTrack;
     bool  m_useTrackQuality;
+    bool  m_useMvaSelection;
+    double m_cutMinMva;
+    edm::FileInPath  m_weightFile;
+ 
+    std::unique_ptr<TMVAEvaluator>  evaluator_MVA;
+
     Helper m_helper;
 };
 
@@ -213,10 +223,25 @@ template <class Container, class Base, class Helper> IPProducer<Container,Base,H
   m_directionWithTracks     = m_config.getParameter<bool>("jetDirectionUsingTracks");
   m_directionWithGhostTrack = m_config.getParameter<bool>("jetDirectionUsingGhostTrack");
   m_useTrackQuality         = m_config.getParameter<bool>("useTrackQuality");
+  m_useMvaSelection         = m_config.getParameter<bool>("useMvaSelection");
 
   if (m_computeGhostTrack)
     produces<reco::TrackCollection>("ghostTracks");
   produces<Product>();
+
+  if (m_useMvaSelection){
+    m_cutMinMva  = m_config.getParameter<double>("minimumMvaDicriminant");
+    m_weightFile = m_config.existsAs<edm::FileInPath>("weightFile") ? m_config.getParameter<edm::FileInPath>("weightFile") : edm::FileInPath("RecoBTag/SecondaryVertex/data/TMVAClassification_BDT.weights.xml.gz");
+       
+    // initialize MVA evaluators
+    evaluator_MVA.reset( new TMVAEvaluator() );
+    std::vector<std::string> variables({"Track_dz", "Track_length", "Track_dist", "Track_IP2D", "Track_pt", "Track_chi2", "Track_nHitPixel", "Track_nHitAll"});
+    std::vector<std::string> spectators;
+    evaluator_MVA->initialize("!V:Color:!Silent:Error", "BDT", m_weightFile.fullPath(), variables, spectators);
+
+  }
+
+
 }
 
 template <class Container, class Base, class Helper> IPProducer<Container,Base,Helper>::~IPProducer()
@@ -285,10 +310,22 @@ IPProducer<Container,Base,Helper>::produce(edm::Event& iEvent, const edm::EventS
      Container selectedTracks;
      std::vector<reco::TransientTrack> transientTracks;
 
+     GlobalVector direction(jetMomentum.x(), jetMomentum.y(), jetMomentum.z());
+
      for(typename Container::const_iterator itTrack = tracks.begin();
          itTrack != tracks.end(); ++itTrack) {
        reco::TransientTrack transientTrack = builder->build(*itTrack);
        const reco::Track & track = transientTrack.track(); //**itTrack;
+     
+       reco::btag::TrackIPData trackIP;
+       trackIP.ip2d = IPTools::signedTransverseImpactParameter(transientTrack, direction, *pv).second;
+       trackIP.distanceToJetAxis = IPTools::jetTrackDistance(transientTrack, direction, *pv).second;
+       TrajectoryStateOnSurface closest =
+               IPTools::closestApproachToJet(transientTrack.impactPointState(),
+                                             *pv, direction,
+                                             transientTrack.field());
+
+
  /*    cout << " pt " <<  track.pt() <<
                " d0 " <<  fabs(track.d0()) <<
                " #hit " <<    track.hitPattern().numberOfValidHits()<<
@@ -296,19 +333,55 @@ IPProducer<Container,Base,Helper>::produce(edm::Event& iEvent, const edm::EventS
                " chi2 " <<  track.normalizedChi2()<<
                " #pixel " <<    track.hitPattern().numberOfValidPixelHits()<< endl;
 */
-       if (track.pt() > m_cutMinPt &&
-           track.hitPattern().numberOfValidHits() >= m_cutTotalHits &&         // min num tracker hits
-           track.hitPattern().numberOfValidPixelHits() >= m_cutPixelHits &&
-           track.normalizedChi2() < m_cutMaxChiSquared &&
-           std::abs(track.dxy(pv->position())) < m_cutMaxTIP &&
-           std::abs(track.dz(pv->position())) < m_cutMaxLIP) {
-//	 std::cout << "selected" << std::endl; 	
-         selectedTracks.push_back(*itTrack);
-         transientTracks.push_back(transientTrack);
-       }
+         bool debug = false;
+         if(debug)
+         {
+           std::cout<<trackIP.ip2d.value()<<","<<track.dxy(pv->position())<<std::endl;
+         }
+         
+      
+         if(m_useMvaSelection){
+           
+           std::map<std::string,float> variables;
+
+           variables["Track_dz"] = track.dz(pv->position());
+           variables["Track_IP2D"] = trackIP.ip2d.value();
+           //variables["Track_IP2D"] = track.dxy(pv->position());
+           variables["Track_pt"] = track.pt();
+           variables["Track_chi2"] = track.normalizedChi2();
+           variables["Track_nHitPixel"] = track.hitPattern().numberOfValidPixelHits();
+           variables["Track_nHitAll"] = track.hitPattern().numberOfValidHits();
+           if(closest.isValid()) 
+             variables["Track_length"] = (closest.globalPosition() - RecoVertex::convertPos(pv->position())).mag();
+           else
+             variables["Track_length"] = -1; 
+           variables["Track_dist"] = trackIP.distanceToJetAxis.value();
+
+
+           double mvaValue = evaluator_MVA->evaluate(variables);
+          
+           if(mvaValue > m_cutMinMva){
+             selectedTracks.push_back(*itTrack);
+             transientTracks.push_back(transientTrack);
+           }
+         }
+
+         else{
+ 
+           if (track.pt() > m_cutMinPt &&
+             track.hitPattern().numberOfValidHits() >= m_cutTotalHits &&         // min num tracker hits
+             track.hitPattern().numberOfValidPixelHits() >= m_cutPixelHits &&
+             track.normalizedChi2() < m_cutMaxChiSquared &&
+             std::abs(track.dxy(pv->position())) < m_cutMaxTIP &&
+             std::abs(track.dz(pv->position())) < m_cutMaxLIP) {
+//            std::cout << "selected" << std::endl; 	
+              selectedTracks.push_back(*itTrack);
+              transientTracks.push_back(transientTrack);
+           }
+        }
      }
 //	std::cout <<"SIZE: " << transientTracks.size() << std::endl;
-     GlobalVector direction(jetMomentum.x(), jetMomentum.y(), jetMomentum.z());
+//     GlobalVector direction(jetMomentum.x(), jetMomentum.y(), jetMomentum.z());
 
      std::auto_ptr<reco::GhostTrack> ghostTrack;
      reco::TrackRef ghostTrackRef;
@@ -477,8 +550,14 @@ void IPProducer<reco::TrackRefVector, reco::JTATagInfo, IPProducerHelpers::FromJ
   desc.add<bool>("computeProbabilities",true);
   desc.add<bool>("useTrackQuality",false);
   desc.add<double>("maximumChiSquared",5.0);
+
+  desc.add<bool>("useMvaSelection",false);  
+  desc.add<double>("minimumMvaDicriminant",0.04);  
+  desc.add<edm::FileInPath>("weightFile",edm::FileInPath("RecoBTag/SecondaryVertex/data/TMVAClassification_BDT.weights.xml.gz"));  
+  
   descriptions.addDefault(desc);
 }
+
 
 template <>
 void IPProducer<std::vector<reco::CandidatePtr>,reco::JetTagInfo,  IPProducerHelpers::FromJetAndCands>::fillDescriptions(edm::ConfigurationDescriptions & descriptions) {
@@ -501,6 +580,11 @@ void IPProducer<std::vector<reco::CandidatePtr>,reco::JetTagInfo,  IPProducerHel
   desc.add<double>("ghostTrackPriorDeltaR",0.03);
   desc.add<double>("maximumChiSquared",5.0);
   desc.addOptional<bool>("explicitJTA",false);
+
+  desc.add<bool>("useMvaSelection",false);
+  desc.add<double>("minimumMvaDicriminant",0.04);    
+  desc.add<edm::FileInPath>("weightFile",edm::FileInPath("RecoBTag/SecondaryVertex/data/TMVAClassification_BDT.weights.xml.gz"));
+
   descriptions.addDefault(desc);
 }
 
