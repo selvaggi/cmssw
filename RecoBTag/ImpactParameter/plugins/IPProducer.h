@@ -230,13 +230,14 @@ template <class Container, class Base, class Helper> IPProducer<Container,Base,H
   produces<Product>();
 
   if (m_useMvaSelection){
-    m_cutMinMva  = m_config.getParameter<double>("minimumMvaDicriminant");
-    m_weightFile = m_config.existsAs<edm::FileInPath>("weightFile") ? m_config.getParameter<edm::FileInPath>("weightFile") : edm::FileInPath("RecoBTag/SecondaryVertex/data/TMVAClassification_BDT.weights.xml.gz");
+    m_cutMinMva  = m_config.getParameter<double>("minimumMvaDiscriminant");
+    m_weightFile = m_config.existsAs<edm::FileInPath>("weightFile") ? m_config.getParameter<edm::FileInPath>("weightFile") : edm::FileInPath("RecoBTag/SecondaryVertex/data/BDT.weights_tracksel_high.xml.gz");
        
     // initialize MVA evaluators
     evaluator_MVA.reset( new TMVAEvaluator() );
-    std::vector<std::string> variables({"Track_dz", "Track_length", "Track_dist", "Track_IP2D", "Track_pt", "Track_chi2", "Track_nHitPixel", "Track_nHitAll"});
-    std::vector<std::string> spectators;
+    //std::vector<std::string> variables({"Track_dz", "Track_length", "Track_dist", "Track_dxy", "Track_pt", "Track_chi2", "Track_nHitPixel", "Track_nHitAll"});
+    std::vector<std::string> variables({"Track_dz", "Track_dxy", "Track_pt", "Track_chi2", "Track_nHitPixel", "Track_nHitAll"});
+    std::vector<std::string> spectators({"Track_length", "Track_dist"});
     evaluator_MVA->initialize("!V:Color:!Silent:Error", "BDT", m_weightFile.fullPath(), variables, spectators);
 
   }
@@ -345,18 +346,18 @@ IPProducer<Container,Base,Helper>::produce(edm::Event& iEvent, const edm::EventS
            std::map<std::string,float> variables;
 
            variables["Track_dz"] = track.dz(pv->position());
-           variables["Track_IP2D"] = trackIP.ip2d.value();
-           //variables["Track_IP2D"] = track.dxy(pv->position());
+           //variables["Track_IP2D"] = trackIP.ip2d.value();
+           variables["Track_dxy"] = track.dxy(pv->position());
            variables["Track_pt"] = track.pt();
            variables["Track_chi2"] = track.normalizedChi2();
            variables["Track_nHitPixel"] = track.hitPattern().numberOfValidPixelHits();
            variables["Track_nHitAll"] = track.hitPattern().numberOfValidHits();
-           if(closest.isValid()) 
+           /*if(closest.isValid()) 
              variables["Track_length"] = (closest.globalPosition() - RecoVertex::convertPos(pv->position())).mag();
            else
              variables["Track_length"] = -1; 
            variables["Track_dist"] = trackIP.distanceToJetAxis.value();
-
+           */
 
            double mvaValue = evaluator_MVA->evaluate(variables);
           
@@ -553,7 +554,7 @@ void IPProducer<reco::TrackRefVector, reco::JTATagInfo, IPProducerHelpers::FromJ
 
   desc.add<bool>("useMvaSelection",false);  
   desc.add<double>("minimumMvaDicriminant",0.04);  
-  desc.add<edm::FileInPath>("weightFile",edm::FileInPath("RecoBTag/SecondaryVertex/data/TMVAClassification_BDT.weights.xml.gz"));  
+  desc.add<edm::FileInPath>("weightFile",edm::FileInPath("RecoBTag/SecondaryVertex/data/BDT.weights_tracksel_high.xml"));  
   
   descriptions.addDefault(desc);
 }
@@ -582,8 +583,8 @@ void IPProducer<std::vector<reco::CandidatePtr>,reco::JetTagInfo,  IPProducerHel
   desc.addOptional<bool>("explicitJTA",false);
 
   desc.add<bool>("useMvaSelection",false);
-  desc.add<double>("minimumMvaDicriminant",0.04);    
-  desc.add<edm::FileInPath>("weightFile",edm::FileInPath("RecoBTag/SecondaryVertex/data/TMVAClassification_BDT.weights.xml.gz"));
+  desc.add<double>("minimumMvaDiscriminant",-999999.9);    
+  desc.add<edm::FileInPath>("weightFile",edm::FileInPath("RecoBTag/SecondaryVertex/data/BDT.weights_tracksel_high.xml"));
 
   descriptions.addDefault(desc);
 }

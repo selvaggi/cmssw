@@ -74,14 +74,48 @@ from DQMOffline.RecoB.bTagGenericAnalysis_cff import *
 
 process.customPfImpactParameterTagInfos = pfImpactParameterTagInfos.clone()
 process.customPfImpactParameterTagInfos.useMvaSelection = cms.bool(True)
-#process.customPfImpactParameterTagInfos.minimumMvaDiscriminant = cms.double(0.04)
-#process.customPfImpactParameterTagInfos.weightFile = cms.FileInPath('RecoBTag/SecondaryVertex/data/TMVAClassification_BDT.weights.xml.gz')
+process.customPfImpactParameterTagInfos.minimumMvaDiscriminant = cms.double(0.1)
+#process.customPfImpactParameterTagInfos.weightFile = cms.FileInPath('RecoBTag/SecondaryVertex/data/BDT.weights_ipprodsel.xml.gz')
+process.customPfImpactParameterTagInfos.weightFile = cms.FileInPath('RecoBTag/SecondaryVertex/data/BDT.weights_tracksel.xml.gz')
 
 process.customPfCombinedInclusiveSecondaryVertexV2BJetTags = pfCombinedInclusiveSecondaryVertexV2BJetTags.clone()
 process.customPfCombinedInclusiveSecondaryVertexV2BJetTags.tagInfos = cms.VInputTag(cms.InputTag("customPfImpactParameterTagInfos"), cms.InputTag("pfInclusiveSecondaryVertexFinderTagInfos"))
 process.customCandidateCombinedSecondaryVertexV2Computer = candidateCombinedSecondaryVertexV2Computer.clone()
 
-#process.customCandidateCombinedSecondaryVertexV2Computer.trackSelection = trackSelection
+
+
+trackSelection = cms.PSet(
+        a_dR = cms.double(-0.001053),
+        a_pT = cms.double(0.005263),
+        b_dR = cms.double(0.6263),
+        b_pT = cms.double(0.3684),
+        jetDeltaRMax = cms.double(0.3),
+#        maxDecayLen = cms.double(5),
+        maxDecayLen = cms.double(9999999999999999),
+#        maxDistToAxis = cms.double(0.07),
+        maxDistToAxis = cms.double(999999999999999),
+        max_pT = cms.double(500),
+        max_pT_dRcut = cms.double(0.1),
+        max_pT_trackPTcut = cms.double(3),
+        min_pT = cms.double(120),
+        min_pT_dRcut = cms.double(0.5),
+        normChi2Max = cms.double(99999.9),
+        pixelHitsMin = cms.uint32(0),
+        ptMin = cms.double(0.0),
+        qualityClass = cms.string('any'),
+        sip2dSigMax = cms.double(99999.9),
+        sip2dSigMin = cms.double(-99999.9),
+        sip2dValMax = cms.double(99999.9),
+        sip2dValMin = cms.double(-99999.9),
+        sip3dSigMax = cms.double(99999.9),
+        sip3dSigMin = cms.double(-99999.9),
+        sip3dValMax = cms.double(99999.9),
+        sip3dValMin = cms.double(-99999.9),
+        totalHitsMin = cms.uint32(0),
+        useVariableJTA = cms.bool(False)
+    )
+
+process.customCandidateCombinedSecondaryVertexV2Computer.trackSelection = trackSelection
 #process.customCandidateCombinedSecondaryVertexV2Computer.trackPseudoSelection = trackPseudoSelection
 
 process.customPfCombinedInclusiveSecondaryVertexV2BJetTags.jetTagComputer = cms.string("customCandidateCombinedSecondaryVertexV2Computer")
@@ -164,7 +198,7 @@ else:
     process.JECseq *= (getattr(process,corrLabel+"ResidualCorrector") * getattr(process,corrLabel+"L1FastL2L3ResidualCorrector"))
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(100)
+    input = cms.untracked.int32(-1)
 )
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring()
