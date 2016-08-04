@@ -138,9 +138,9 @@ bTagTrackIPAnalysisBlockCustom = cms.PSet(
 ## 1rst loop here
 
 
-xmin = -0.2;
-xmax = 0.0;
-nstep = 50;
+xmin = 0.0;
+xmax = 0.2;
+nstep = 20;
 
 tagConfigMain = cms.VPSet(
     cms.PSet(
@@ -166,11 +166,8 @@ for i in range(0,nstep+1):
   getattr(process, "customPfImpactParameterTagInfos"+postfix).useMvaSelection = cms.bool(True)
   #getattr(process, "customPfImpactParameterTagInfos"+postfix).useMvaSelection = cms.bool(False)
   getattr(process, "customPfImpactParameterTagInfos"+postfix).minimumMvaDiscriminant = cms.double(cutval)
-  #getattr(process, "customPfImpactParameterTagInfos"+postfix).weightFile = cms.FileInPath('RecoBTag/SecondaryVertex/data/BDT.weights_tracksel_high_v2.xml')
-  getattr(process, "customPfImpactParameterTagInfos"+postfix).weightFile = cms.FileInPath('RecoBTag/SecondaryVertex/data/BDT.weights_ipprodsel_v2.xml')
-  #getattr(process, "customPfImpactParameterTagInfos"+postfix).weightFile = cms.FileInPath('RecoBTag/SecondaryVertex/data/BDT.weights_tracksel.xml.gz')
-  #getattr(process, "customPfImpactParameterTagInfos"+postfix).weightFile = cms.FileInPath('RecoBTag/SecondaryVertex/data/BDT.weights_tracksel.xml')
-
+  getattr(process, "customPfImpactParameterTagInfos"+postfix).weightFile = cms.FileInPath('RecoBTag/SecondaryVertex/data/BDT_nosel_8Var.weights.xml.gz')
+ 
   setattr(process, "customPfCombinedInclusiveSecondaryVertexV2BJetTags"+postfix, process.pfCombinedInclusiveSecondaryVertexV2BJetTags.clone())
   getattr(process, "customPfCombinedInclusiveSecondaryVertexV2BJetTags"+postfix).tagInfos = cms.VInputTag(cms.InputTag("customPfImpactParameterTagInfos"+postfix), 
                                                                                                         cms.InputTag("pfInclusiveSecondaryVertexFinderTagInfos"))
@@ -297,9 +294,9 @@ process.dqmSaver.saveByRun = cms.untracked.int32(-1)
 process.dqmSaver.saveAtJobEnd =cms.untracked.bool(True) 
 process.dqmSaver.forceRunNumber = cms.untracked.int32(1)
 process.PoolSource.fileNames = [
- "file:/afs/cern.ch/work/s/selvaggi/public/00C31A90-2237-E611-9C70-002590D0AFD0.root"
-]
-'''root://cms-xrd-global.cern.ch//store/mc/RunIISpring16DR80/TT_TuneCUETP8M1_13TeV-powheg-pythia8/GEN-SIM-RECODEBUG/PUSpring16_RECODEBUG_80X_mcRun2_asymptotic_2016_v3_ext3-v1/20000/00C31A90-2237-E611-9C70-002590D0AFD0.root',
+"file:/afs/cern.ch/work/s/selvaggi/public/00C31A90-2237-E611-9C70-002590D0AFD0.root",
+
+'root://cms-xrd-global.cern.ch//store/mc/RunIISpring16DR80/TT_TuneCUETP8M1_13TeV-powheg-pythia8/GEN-SIM-RECODEBUG/PUSpring16_RECODEBUG_80X_mcRun2_asymptotic_2016_v3_ext3-v1/20000/00C31A90-2237-E611-9C70-002590D0AFD0.root',
 'root://cms-xrd-global.cern.ch//store/mc/RunIISpring16DR80/TT_TuneCUETP8M1_13TeV-powheg-pythia8/GEN-SIM-RECODEBUG/PUSpring16_RECODEBUG_80X_mcRun2_asymptotic_2016_v3_ext3-v1/20000/025349EA-C037-E611-B304-20CF3027A594.root',
 'root://cms-xrd-global.cern.ch//store/mc/RunIISpring16DR80/TT_TuneCUETP8M1_13TeV-powheg-pythia8/GEN-SIM-RECODEBUG/PUSpring16_RECODEBUG_80X_mcRun2_asymptotic_2016_v3_ext3-v1/20000/04BFF711-3237-E611-85C0-20CF3027A5BB.root',
 'root://cms-xrd-global.cern.ch//store/mc/RunIISpring16DR80/TT_TuneCUETP8M1_13TeV-powheg-pythia8/GEN-SIM-RECODEBUG/PUSpring16_RECODEBUG_80X_mcRun2_asymptotic_2016_v3_ext3-v1/20000/061C86C8-4237-E611-97B7-3417EBE535DA.root',
@@ -548,7 +545,7 @@ process.PoolSource.fileNames = [
 'root://cms-xrd-global.cern.ch//store/mc/RunIISpring16DR80/TT_TuneCUETP8M1_13TeV-powheg-pythia8/GEN-SIM-RECODEBUG/PUSpring16_RECODEBUG_80X_mcRun2_asymptotic_2016_v3_ext3-v1/20000/FCA2807D-4337-E611-80DE-20CF3027A5FA.root',
 'root://cms-xrd-global.cern.ch//store/mc/RunIISpring16DR80/TT_TuneCUETP8M1_13TeV-powheg-pythia8/GEN-SIM-RECODEBUG/PUSpring16_RECODEBUG_80X_mcRun2_asymptotic_2016_v3_ext3-v1/20000/FE40CF67-FC36-E611-94F3-782BCB206470.root'
 ]
-'''
+
 #keep the logging output to a nice level
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.MessageLogger.cerr.FwkReport.reportEvery = 1

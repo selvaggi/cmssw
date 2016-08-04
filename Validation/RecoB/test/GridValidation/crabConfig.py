@@ -18,7 +18,7 @@ config.Data.splitting = 'FileBased'
 #config.Data.splitting = 'LumiBased'
 config.Data.unitsPerJob = 3
 config.Data.totalUnits = -1
-config.Data.outLFNDirBase = "/store/user/selvaggi/bTag/trackOpti"
+config.Data.outLFNDirBase = "/store/user/selvaggi/bTag/trackOpti_v2"
 config.Data.publication = False
 # This string is used to construct the output dataset name
 #config.Data.publishDataName = ''

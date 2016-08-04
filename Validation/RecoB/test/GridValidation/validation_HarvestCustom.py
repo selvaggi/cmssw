@@ -92,7 +92,7 @@ bTagTrackIPAnalysisBlockCustom = cms.PSet(
 
 xmin = 0.0;
 xmax = 0.2;
-nstep = 25;
+nstep = 20;
 
 tagConfigMain = cms.VPSet(
     cms.PSet(
@@ -154,27 +154,7 @@ process.dqmSaver.saveAtJobEnd = cms.untracked.bool(True)
 process.dqmSaver.forceRunNumber = cms.untracked.int32(1)
 
 process.DQMRootSource.fileNames = [
-'file:/storage/data/cms/store/user/selvaggi/bTag/trackOpti/TT_TuneCUETP8M1_13TeV-powheg-pythia8/crab_Track_optimization_fullTrackSel/160801_092649/0000/MEtoEDMConverter_10.root',
-'file:/storage/data/cms/store/user/selvaggi/bTag/trackOpti/TT_TuneCUETP8M1_13TeV-powheg-pythia8/crab_Track_optimization_fullTrackSel/160801_092649/0000/MEtoEDMConverter_18.root',
-'file:/storage/data/cms/store/user/selvaggi/bTag/trackOpti/TT_TuneCUETP8M1_13TeV-powheg-pythia8/crab_Track_optimization_fullTrackSel/160801_092649/0000/MEtoEDMConverter_20.root',
-'file:/storage/data/cms/store/user/selvaggi/bTag/trackOpti/TT_TuneCUETP8M1_13TeV-powheg-pythia8/crab_Track_optimization_fullTrackSel/160801_092649/0000/MEtoEDMConverter_22.root',
-'file:/storage/data/cms/store/user/selvaggi/bTag/trackOpti/TT_TuneCUETP8M1_13TeV-powheg-pythia8/crab_Track_optimization_fullTrackSel/160801_092649/0000/MEtoEDMConverter_28.root',
-'file:/storage/data/cms/store/user/selvaggi/bTag/trackOpti/TT_TuneCUETP8M1_13TeV-powheg-pythia8/crab_Track_optimization_fullTrackSel/160801_092649/0000/MEtoEDMConverter_29.root',
-'file:/storage/data/cms/store/user/selvaggi/bTag/trackOpti/TT_TuneCUETP8M1_13TeV-powheg-pythia8/crab_Track_optimization_fullTrackSel/160801_092649/0000/MEtoEDMConverter_31.root',
-'file:/storage/data/cms/store/user/selvaggi/bTag/trackOpti/TT_TuneCUETP8M1_13TeV-powheg-pythia8/crab_Track_optimization_fullTrackSel/160801_092649/0000/MEtoEDMConverter_32.root',
-'file:/storage/data/cms/store/user/selvaggi/bTag/trackOpti/TT_TuneCUETP8M1_13TeV-powheg-pythia8/crab_Track_optimization_fullTrackSel/160801_092649/0000/MEtoEDMConverter_36.root',
-'file:/storage/data/cms/store/user/selvaggi/bTag/trackOpti/TT_TuneCUETP8M1_13TeV-powheg-pythia8/crab_Track_optimization_fullTrackSel/160801_092649/0000/MEtoEDMConverter_39.root',
-'file:/storage/data/cms/store/user/selvaggi/bTag/trackOpti/TT_TuneCUETP8M1_13TeV-powheg-pythia8/crab_Track_optimization_fullTrackSel/160801_092649/0000/MEtoEDMConverter_3.root',
-'file:/storage/data/cms/store/user/selvaggi/bTag/trackOpti/TT_TuneCUETP8M1_13TeV-powheg-pythia8/crab_Track_optimization_fullTrackSel/160801_092649/0000/MEtoEDMConverter_40.root',
-'file:/storage/data/cms/store/user/selvaggi/bTag/trackOpti/TT_TuneCUETP8M1_13TeV-powheg-pythia8/crab_Track_optimization_fullTrackSel/160801_092649/0000/MEtoEDMConverter_41.root',
-'file:/storage/data/cms/store/user/selvaggi/bTag/trackOpti/TT_TuneCUETP8M1_13TeV-powheg-pythia8/crab_Track_optimization_fullTrackSel/160801_092649/0000/MEtoEDMConverter_46.root',
-'file:/storage/data/cms/store/user/selvaggi/bTag/trackOpti/TT_TuneCUETP8M1_13TeV-powheg-pythia8/crab_Track_optimization_fullTrackSel/160801_092649/0000/MEtoEDMConverter_47.root',
-'file:/storage/data/cms/store/user/selvaggi/bTag/trackOpti/TT_TuneCUETP8M1_13TeV-powheg-pythia8/crab_Track_optimization_fullTrackSel/160801_092649/0000/MEtoEDMConverter_56.root',
-'file:/storage/data/cms/store/user/selvaggi/bTag/trackOpti/TT_TuneCUETP8M1_13TeV-powheg-pythia8/crab_Track_optimization_fullTrackSel/160801_092649/0000/MEtoEDMConverter_57.root',
-'file:/storage/data/cms/store/user/selvaggi/bTag/trackOpti/TT_TuneCUETP8M1_13TeV-powheg-pythia8/crab_Track_optimization_fullTrackSel/160801_092649/0000/MEtoEDMConverter_58.root',
-'file:/storage/data/cms/store/user/selvaggi/bTag/trackOpti/TT_TuneCUETP8M1_13TeV-powheg-pythia8/crab_Track_optimization_fullTrackSel/160801_092649/0000/MEtoEDMConverter_60.root',
-'file:/storage/data/cms/store/user/selvaggi/bTag/trackOpti/TT_TuneCUETP8M1_13TeV-powheg-pythia8/crab_Track_optimization_fullTrackSel/160801_092649/0000/MEtoEDMConverter_61.root',
-'file:/storage/data/cms/store/user/selvaggi/bTag/trackOpti/TT_TuneCUETP8M1_13TeV-powheg-pythia8/crab_Track_optimization_fullTrackSel/160801_092649/0000/MEtoEDMConverter_9.root'
+
 ]
 
 open('pydump.py','w').write(process.dumpPython())

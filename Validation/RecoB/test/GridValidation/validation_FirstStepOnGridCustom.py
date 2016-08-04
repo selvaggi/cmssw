@@ -130,9 +130,9 @@ bTagTrackIPAnalysisBlockCustom = cms.PSet(
 ## 1rst loop here
 
 
-xmin = -0.2;
-xmax = 0.0;
-nstep = 50;
+xmin = 0.0;
+xmax = 0.2;
+nstep = 20;
 
 tagConfigMain = cms.VPSet(
     cms.PSet(
@@ -158,10 +158,7 @@ for i in range(0,nstep+1):
   getattr(process, "customPfImpactParameterTagInfos"+postfix).useMvaSelection = cms.bool(True)
   #getattr(process, "customPfImpactParameterTagInfos"+postfix).useMvaSelection = cms.bool(False)
   getattr(process, "customPfImpactParameterTagInfos"+postfix).minimumMvaDiscriminant = cms.double(cutval)
-  #getattr(process, "customPfImpactParameterTagInfos"+postfix).weightFile = cms.FileInPath('RecoBTag/SecondaryVertex/data/BDT.weights_tracksel_high_v2.xml')
-  getattr(process, "customPfImpactParameterTagInfos"+postfix).weightFile = cms.FileInPath('RecoBTag/SecondaryVertex/data/BDT.weights_ipprodsel_v2.xml')
-  #getattr(process, "customPfImpactParameterTagInfos"+postfix).weightFile = cms.FileInPath('RecoBTag/SecondaryVertex/data/BDT.weights_tracksel.xml.gz')
-  #getattr(process, "customPfImpactParameterTagInfos"+postfix).weightFile = cms.FileInPath('RecoBTag/SecondaryVertex/data/BDT.weights_tracksel.xml')
+  getattr(process, "customPfImpactParameterTagInfos"+postfix).weightFile = cms.FileInPath('RecoBTag/SecondaryVertex/data/BDT_nosel_8Var.weights.xml.gz')
 
   setattr(process, "customPfCombinedInclusiveSecondaryVertexV2BJetTags"+postfix, process.pfCombinedInclusiveSecondaryVertexV2BJetTags.clone())
   getattr(process, "customPfCombinedInclusiveSecondaryVertexV2BJetTags"+postfix).tagInfos = cms.VInputTag(cms.InputTag("customPfImpactParameterTagInfos"+postfix), 
@@ -289,7 +286,7 @@ process.PoolSource.fileNames = [
 
 #keep the logging output to a nice level
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
-process.MessageLogger.cerr.FwkReport.reportEvery = 100
+process.MessageLogger.cerr.FwkReport.reportEvery = 1
 
 process.GlobalTag = tag
 
